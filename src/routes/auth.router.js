@@ -1,4 +1,3 @@
-
 import { Router } from "express";
 
 // Asegurarse de que el import sea desde la ruta correcta
