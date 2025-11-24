@@ -37,13 +37,22 @@ export const logger = (req, res, next) => {
         // Imprime el bloque de log formateado usando los códigos de color ANSI.
         console.log(`
         ${c.yellow}▨▨▨▨▨▨▨▨▨▨▨▨  PETICIÓN FINALIZADA  ▨▨▨▨▨▨▨▨▨▨▨▨
-        ${c.cyan}⚙ Método: ${c.green}${req.method}          // Muestra el método HTTP (GET, POST, PUT, DELETE).
-        ${c.red}⚙ Ruta: ${c.yellow}${req.originalUrl}      // Muestra la URL completa solicitada.
-        ${c.green}⚙ Hora: ${c.cyan}${new Date().toISOString()} // Muestra la hora de finalización en formato ISO.
-        ${c.yellow}⚙ Content-Type:${c.red} ${req.headers["content-type"] || "No especificado"} // Muestra el tipo de contenido enviado en la solicitud.
-        ${c.green}⚙ Estado:${c.cyan} ${res.statusCode}     // Muestra el código de estado HTTP de la respuesta (ej. 200, 404, 500).
+        ${c.cyan}⚙ Método: ${c.green}${req.method}
+        ${c.red}⚙ Ruta: ${c.yellow}${req.originalUrl}
+        ${c.green}⚙ Hora: ${c.cyan}${new Date().toISOString()}
+        ${c.yellow}⚙ Content-Type:${c.red} ${req.headers["content-type"] || "No especificado"}
+        ${c.green}⚙ Estado:${c.cyan} ${res.statusCode}
         ${c.yellow}================================================${c.reset}
         `);
+        // console.log(`
+        // ${c.yellow}▨▨▨▨▨▨▨▨▨▨▨▨  PETICIÓN FINALIZADA  ▨▨▨▨▨▨▨▨▨▨▨▨
+        // ${c.cyan}⚙ Método: ${c.green}${req.method}          // Muestra el método HTTP (GET, POST, PUT, DELETE).
+        // ${c.red}⚙ Ruta: ${c.yellow}${req.originalUrl}      // Muestra la URL completa solicitada.
+        // ${c.green}⚙ Hora: ${c.cyan}${new Date().toISOString()} // Muestra la hora de finalización en formato ISO.
+        // ${c.yellow}⚙ Content-Type:${c.red} ${req.headers["content-type"] || "No especificado"} // Muestra el tipo de contenido enviado en la solicitud.
+        // ${c.green}⚙ Estado:${c.cyan} ${res.statusCode}     // Muestra el código de estado HTTP de la respuesta (ej. 200, 404, 500).
+        // ${c.yellow}================================================${c.reset}
+        // `);
         // Línea comentada para mostrar la duración si fuera necesario: 
         // ${c.red}⚙ Duración:${c.yellow} ${duration}ms 
     });
