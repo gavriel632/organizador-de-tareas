@@ -66,18 +66,9 @@ app.use(express.json());
 //=======================================================
 //  MIDDLEWARE DE REGISTRO GENERAL
 //=======================================================
-// Se ejecuta *antes* de cualquier ruta
-app.use((req, res, next) => {
-    const timestamp = new Date().toISOString(); // Fecha y hora actual en formato ISO - legible. Si comentamos esta linea genera un error, en donde se usa timestamp mas abajo.
-    console.log("\n========= NUEVA PETICIÓN =========");
-    console.log("=> Fecha:", timestamp);
-    console.log("=> Método:", req.method);         // GET, POST, PUT, DELETE, etc.
-    console.log("=> URL original:", req.originalUrl); // La URL completa pedida
-    //console.log("=> Cabeceras:", req.headers);     // Info enviada por el cliente
-    console.log("=> content-type:", req.headers['content-type'] || 'No especificado');
-    console.log("==================================\n");
-    next(); // Continua al siguiente middleware o ruta
-});
+import { logger } from "./src/middleware/logger.middleware.js";
+app.use(logger)
+
 
 // ======================================================
 // RUTAS PRINCIPALES
