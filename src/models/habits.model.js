@@ -1,5 +1,5 @@
 // Importa la instancia de la base de datos (Firestore) inicializada en data.js.
-import { db } from "./data.js";
+import { db } from "../config/firebase.js";
 // Importa las funciones necesarias del SDK de Firebase Firestore para interactuar con la base de datos.
 import { collection, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc } from "firebase/firestore";
 

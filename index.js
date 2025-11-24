@@ -1,23 +1,116 @@
+//=======================================================
+// index.js — Punto de entrada principal del servidor Node.js con Express
+//=======================================================
+
+// Importamos el módulo 'express' que nos permite crear un servidor HTTP de forma sencilla
+import express from "express";
+
+// Importamos 'cors' para permitir solicitudes desde distintos orígenes (dominios diferentes)
+import cors from "cors";
+
+// Importamos 'dotenv/config' para poder usar variables de entorno definidas en un archivo .env
+// Esto nos permite mantener configuraciones (como el puerto) fuera del código fuente
 import "dotenv/config";
 
-// import dotenv from 'dotenv';
 
-// 1. Cargar variables de entorno al inicio
-// dotenv.config()
+// ======================================================
+// CONFIGURACIÓN INICIAL DEL SERVIDOR
+// ======================================================
 
-import express from "express";
+// Creamos una instancia de la aplicación Express; este objeto es nuestro servidor
 const app = express();
 
-import cors from "cors";
-////////////////////////////////////////////////////
-// MIDDLEWARE DE EXPRESS
 
+// ======================================================
+// VARIABLES DE ENTORNO
+// ======================================================
+
+console.log("=> PORT:", process.env.PORT); // Muestra la variable de entorno PORT si está definida 
+console.log("=> NODE_ENV:", process.env.NODE_ENV); // Muestra el entorno actual (development, production, etc.)
+
+// Definimos el puerto en el que correrá el servidor
+// Si existe la variable de entorno PORT, la usamos; si no, por defecto será 3000
+const PORT = process.env.PORT || 3001;
+
+//=======================================================
+// #### ///     MIDDLEWARE de MANTENIMIENTO      /// #### 
+// ======================================================
+
+// Sirve para cualquier metodo (GET, POST, PUT, DELETE, etc). 
+// Next no lo voy a usar, pero es necesario ponerlo.
+// Dos ejemplos de como hacerlo:
+
+// Descomentar para activar el modo mantenimiento 1
+
+// app.use((req, res, next) => { 
+//   res.json({mensaje: 'API en Mantenimiento !!!'});
+// });
+
+// Descomentar para activar el modo mantenimiento 2
+
+// app.use((req, res, next) => { 
+//   res.status(503).json({error: 'API en Mantenimiento !!!'});
+// });
+
+// ======================================================
+// MIDDLEWARES GLOBALES
+// ======================================================
+
+// Habilita CORS (Cross-Origin Resource Sharing), permitiendo que otros dominios (p. ej. un frontend React) accedan a nuestra API
 app.use(cors());
-// para parsear JSON //
-app.use(express.json()); // Nos permite recibir y enviar objetos JSON
 
-////////////////////////////////////////////////////
-/// IMPORTAR RUTAS ///
+// Middleware que permite a Express interpretar automáticamente cuerpos de solicitud en formato JSON
+// Sin esto, no podríamos acceder a req.body en las peticiones POST o PUT
+app.use(express.json());
+
+//=======================================================
+//  MIDDLEWARE DE REGISTRO GENERAL
+//=======================================================
+// Se ejecuta *antes* de cualquier ruta
+app.use((req, res, next) => {
+    const timestamp = new Date().toISOString(); // Fecha y hora actual en formato ISO - legible. Si comentamos esta linea genera un error, en donde se usa timestamp mas abajo.
+    console.log("\n========= NUEVA PETICIÓN =========");
+    console.log("=> Fecha:", timestamp);
+    console.log("=> Método:", req.method);         // GET, POST, PUT, DELETE, etc.
+    console.log("=> URL original:", req.originalUrl); // La URL completa pedida
+    //console.log("=> Cabeceras:", req.headers);     // Info enviada por el cliente
+    console.log("=> content-type:", req.headers['content-type'] || 'No especificado');
+    console.log("==================================\n");
+    next(); // Continua al siguiente middleware o ruta
+});
+
+// ======================================================
+// RUTAS PRINCIPALES
+// ======================================================
+
+// Definimos una ruta GET en la raíz ("/") que responde con un mensaje de bienvenida
+// Esto sirve como endpoint de prueba para confirmar que el servidor funciona
+app.get('/', (req, res) => {
+    res.json({ mensaje: 'API REST en Node.js funcionando correctamente desde la URL: /' });
+});
+
+
+//=======================================================
+// IMPORTACION DE RUTAS - Todas las rutas relacionadas con AUTENTICACION
+// ======================================================
+
+// Importamos el enrutador de la autenticacion, donde definimos las rutas relacionadas con "auth"
+import authRouter from './src/routes/auth.router.js';
+
+// Asignamos el router de tareas al prefijo '/api/tasks'
+// Esto significa que todas las rutas dentro de auth.router.js comenzarán con ese prefijo
+
+// app.use('/api/auth', authRouter);
+app.use('/api/auth', authRouter); // NO COLOCAR ACA EL AUTH ANTES DEL AUTHROUTER porque estaria diciendo que el login tiene que esta autorizado.
+
+
+
+//=======================================================
+// IMPORTACION DE RUTAS - Todas las rutas
+// ======================================================
+import usersRouter from './src/routes/users.router.js';
+app.use('/api', usersRouter);
+
 import tasksRouter from './src/routes/tasks.router.js'; // importar tasks.router.js y lo llamo tasksRouter
 app.use('/api', tasksRouter); // Le digo a la aplicacion que use ese tasksRouter pero antes le pongo un prefijo
 
@@ -34,41 +127,74 @@ import habitsRouter from './src/routes/habits.router.js';
 app.use('/api', habitsRouter);
 
 
-////////////////////////////////////////////////////
-import usersRouter from './src/routes/users.router.js';
-app.use('/api', usersRouter);
 
-import authRouter from "./src/routes/auth.router.js";
-app.use('/api/auth', authRouter);
-
-////////////////////////////////////////////////////
+//=======================================================
+// ******************************************************
+//=======================================================
 
 
+// =======================================================
+// MIDDLEWARE - 404 (RUTA NO ENCONTRADA)
+// =======================================================
 
-/// Rutas GET - RAIZ ///
-
-app.get('/', (req, res)=>{
-    res.json({mensaje:'¡API REST en Node.js funcionando correctamente desde la URL: / !!!'});
+// Este middleware se ejecuta si ninguna de las rutas anteriores fue encontrada
+// Maneja errores de tipo "No encontrado" (404) para cualquier método (GET, POST, etc.)
+app.use((req, res, next) => {
+    res.status(404).json({
+        error: 'MIDDLE: Ruta NO encontrada', // Mensaje de error genérico
+        ruta: req.originalUrl // Muestra la ruta que el cliente intentó acceder, originalUrl es una propiedad del req, 
+                            // contiene la Url que el cliente intento acceder. Incluye el path y los parámetros (pero no el dominio ni el protocolo).
+    });
 });
 
 
-////////////////////////////////////////////////////
+// =======================================================
+// MIDDLEWARE - MANEJADOR GLOBAL DE ERRORES
+// =======================================================
 
-/// MIDDLEWARE ///
+// Middleware especial para capturar y manejar errores internos del servidor
+// Evita que el servidor se caiga ante un error inesperado y devuelve una respuesta JSON controlada
+app.use((err, req, res, next) => {
+    //console.error('Error interno:', err.stack); // Muestra el error completo en consola para depuración
+    console.log("=> Se capturó un error en el middleware global:");
+    console.log("=> Mensaje:", err.message);
+    console.log("=> Stack:", err.stack);  // En desarrollo, muestra el stack trace completo, no recomendado en producción
+    // que es el stack trace? El stack trace es una representación detallada de la secuencia de llamadas de funciones que llevaron a un error en un programa.
 
-app.use((req, res, next)=>{
-    // Middleware para menejar rutas no difinidas (404).
-    // Sirve para cualquier metodo.
-    // Next, no lo voy a usar, pero en necesario ponerlo.
+    // Respondemos con código 500 (Internal Server Error) y detalles del error
+    // En desarrollo mostramos detalles; en producción, no.
+    const response = {
+        error: '<<< INT >>> Error interno del servidor <<< INT >>>',
+        mensaje: err.message,
+    };
 
-    res.status(404).json({error: "MIDDLE: Ruta no encontrada"})
+    if (process.env.NODE_ENV !== 'production') {
+        response.stack = err.stack;
+    }
+
+    // Muestra el mensaje del error que causó la excepción en nuestro caso el mensaje es "<<< SIM >>> Error simulado en /error <<< SIM >>>" (ver ruta /error arriba)
+    // No es recomendable enviar el stack trace al cliente en producción por razones de seguridad
+    // pero para desarrollo puede ser útil.
+    // detalle: err.stack  
+
+    res.status(500).json(response);  
+
 });
 
+//=======================================================
+// ******************************************************
+//=======================================================
 
-////////////////////////////////////////////////////
 
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, ()=> {
-    console.log(`Servidor escuchando el puerto http://localhost:${PORT}`);
-});
+// =======================================================
+// INICIO DEL SERVIDOR
+// =======================================================
+
+// Iniciamos el servidor para que escuche en el puerto definido
+// La función de callback se ejecuta una vez que el servidor está en marcha
+app.listen(PORT, () => {
+  console.log(`Servidor escuchando en: http://localhost:${PORT}`)});
+
+//=======================================================
+// FIN DE index.js

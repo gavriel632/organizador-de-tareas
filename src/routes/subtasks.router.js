@@ -14,21 +14,12 @@ import {
 
 //////////////////////////////////////////////
 
-/// Rutas GET ///
+/// Rutas ///
 router.get('/subtasks', getAllSubtasks);
 router.get('/subtasks/search', searchSubtask);
 router.get('/subtasks/:id', getSubtaskById);
-
-//////////////////////////////////////////////
-/// Rutas POST ///
 router.post('/subtasks', createSubtask);
-
-//////////////////////////////////////////////
-/// Rutas PUT ///
 router.put('/subtasks/:id', updateSubtask);
-
-//////////////////////////////////////////////
-/// Rutas DELETE ///
 router.delete('/subtasks/:id', deleteSubtask);
 
 //////////////////////////////////////////////

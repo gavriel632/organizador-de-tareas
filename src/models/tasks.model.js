@@ -1,7 +1,5 @@
-// src/models/tasks.model.js
-
 // Importa la instancia de la base de datos (Firestore) inicializada en data.js.
-import { db } from "./data.js"; 
+import { db } from "../config/firebase.js";
 // Importa las funciones del SDK de Firebase Firestore necesarias para todas las operaciones CRUD y consultas con filtros.
 import { 
     collection,getDocs,getDoc,addDoc,deleteDoc,doc,updateDoc,query,where

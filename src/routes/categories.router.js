@@ -14,21 +14,12 @@ import {
 
 //////////////////////////////////////////////
 
-/// Rutas GET ///
+/// Rutas ///
 router.get('/categories', getAllCategories);
 router.get('/categories/search', searchCategory);
 router.get('/categories/:id', getCategoryById);
-
-//////////////////////////////////////////////
-/// Rutas POST ///
 router.post('/categories', createCategory);
-
-//////////////////////////////////////////////
-/// Rutas PUT ///
 router.put('/categories/:id', updateCategory);
-
-//////////////////////////////////////////////
-/// Rutas DELETE ///
 router.delete('/categories/:id', deleteCategory);
 
 //////////////////////////////////////////////

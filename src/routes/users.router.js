@@ -1,5 +1,4 @@
 import { Router } from "express";
-
 const router = Router();
 
 //////////////////////////////////////////////
@@ -12,27 +11,24 @@ import {
     deleteUser
 } from "../controllers/users.controller.js";
 
+
+//////////////////////////////////////////////
+// 🔐 MIDDLEWARE DE AUTENTICACIÓN
 import { validarToken } from "../middleware/auth.middleware.js";
 
 //////////////////////////////////////////////
 
-
-/// Rutas GET ///
+/// Rutas protegidas con JWT (solo si el usuario está logueado) ///
 router.get('/users', validarToken, getAllUsers);
 router.get('/users/search', validarToken, searchUser);
 router.get('/users/:id', validarToken, getUserById);
+router.put('/users/:id',validarToken, updateUser);
+router.delete('/users/:id',validarToken, deleteUser);
 
 //////////////////////////////////////////////
-/// Rutas POST ///
+/// Rutas NO protegidas con JWT  ///
 router.post('/users', createUser);
 
-//////////////////////////////////////////////
-/// Rutas PUT ///
-router.put('/users/:id',validarToken, updateUser);
-
-//////////////////////////////////////////////
-/// Rutas DELETE ///
-router.delete('/users/:id',validarToken, deleteUser);
 
 //////////////////////////////////////////////
 export default router;

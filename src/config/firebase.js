@@ -58,7 +58,7 @@ const db = getFirestore(app);
 // Exportamos la conexión para que cualquier módulo pueda importarla y usar Firestore.
 //
 // Ejemplo de uso en otro archivo:
-//   import { db } from "./data.js";
+//   import { db } from "./firebase.js";
 //   const usersCollection = collection(db, "users");
 
 export { db };
